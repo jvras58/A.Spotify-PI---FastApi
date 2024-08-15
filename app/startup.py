@@ -8,6 +8,7 @@ from app.api.authorization.router import router as authorization_router
 from app.api.role.router import router as role_router
 from app.api.transaction.router import router as transaction_router
 from app.api.user.router import router as user_router
+from app.api.spotify.router import router as spotify_router
 
 app = FastAPI()
 
@@ -42,6 +43,8 @@ app.include_router(assignment_router, prefix='/assignment', tags=['Assignments']
 app.include_router(
     authorization_router, prefix='/authorization', tags=['Authorizations']
 )
+# TODO: estou aqui:
+app.include_router(spotify_router, prefix='/spotify', tags=['Spotify'])
 # ----------------------------------
 
 
