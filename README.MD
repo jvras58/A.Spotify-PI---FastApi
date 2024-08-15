@@ -31,11 +31,11 @@ Este projeto está sendo desenvolvido com:
 ## :information_source: Como usar
 
 ```bash
-# Clonar este repositório
-$ git clone git@github.com:jvras58/back-fastapi.git
+# Clonar este repositório 
+$ git clone git@github.com:repo/repo.git
 
 # Ir para o repositório
-$ cd back-fastapi  
+$ cd repo 
 
 # Criar o arquivo .env com os valores adequados ao ambiente. pasta .secrets precisa ter (TESTE_SECRET).
 $ cp .env-semple .env
@@ -56,4 +56,86 @@ $ task run
 - Endereço local: (http://localhost:8000)
 
 
----
+### Estrutura:
+```
+/ 📁 Root
+|
+├── 📁app  ->  [Implementação da API]
+│   ├── 📁api
+│   │   ├── 📁assignment
+│   │   │   ├── 🐍 router.py
+│   │   │   └── 🐍 schemas.py
+│   │       ...
+│   │   ├── 📁authentication
+│   │   │   ├── 🐍 controller.py
+│   │   │   ├─  🐍 router.py
+│   │   │   └── 🐍 schemas.py
+│   │       ...
+│   │   ├── 📁authorization
+│   │   │   ├── 🐍 controller.py
+│   │   │   ├── 🐍 middleware.py
+│   │   │   ├─  🐍 router.py
+│   │   │   └── 🐍 schemas.py
+│   │   │   ...
+│   │   ├── 📁role
+│   │   │   ├─  🐍 router.py
+│   │   │   └── 🐍 schemas.py
+│   │   │   ...
+│   │   ├── 📁transaction
+│   │   │   ├── enum_operation_code.py
+│   │   │   ├─  🐍 router.py
+│   │   │   └── 🐍 schemas.py
+│   │   │   ...
+│   │   └── 📁user
+│   │       ├── 🐍 controller.py
+│   │       ├─  🐍 router.py
+│   │       └── 🐍 schemas.py
+│   │      ...
+│   ├── 📁database ->  [configurações do banco de dados da aplicação]
+│   │   └── 🐍 session.py
+│   │      ...
+│   ├── 📁models
+│   │   ├── 🐍 assignment.py
+│   │   ├── 🐍 authorization.py
+│   │   ├── 🐍 __init__.py -> [Mapeamento de classes SQLALCHEMY]
+│   │   ├── 🐍 role.py
+│   │   ├── 🐍 transaction.py
+│   │   └── 🐍 user.py
+│   │       ...
+│   ├── 🐍 startup.py
+│   └── 📁utils
+│       ├── 🐍 base_model.py
+│       ├── 🐍 base_schemas.py
+│       ├── 🐍 exceptions.py -> [Exceptions / Error]
+│       ├── 🐍 generic_controller.py  ->  [ Controlador Generico CRUD]
+│       ├── 🐍 security.py
+│       └── 🐍 settings.py
+│          ...
+├── 📁 migrations
+│   ├── 🐍 env.py ->  [Configurações dos modelos da aplicação]
+│   ├── README
+│   ├── script.py.mako
+│   └── versions
+│       ├── 🐍 xxxxxxxxbd_version.py
+│   │      ...
+├── 📄poetry.lock
+├── 📄pyproject.toml
+├── 📄README.MD
+└── 📁 tests ->  [Testes da aplicação]
+    ├── 🐍 conftest.py  ->  [configuração do ambiente de testes / fixtures.]
+    ├── factory
+    │   ├── 🐍 assignment_factory.py
+    │   ├── 🐍 authorization_factory.py
+    │   ├── 🐍 role_factory.py
+    │   ├── 🐍 trasaction_factory.py
+    │   └── 🐍 user_factory.py
+    │      ...
+    ├── 🐍 test_assignment.py
+    ├── 🐍 test_authentication.py
+    ├── 🐍 test_authorization.py
+    ├── 🐍 test_role.py
+    ├── 🐍 test_startup.py
+    ├── 🐍 test_transactions.py
+    └── 🐍 test_users.py
+├── 📄alembic.ini
+```
