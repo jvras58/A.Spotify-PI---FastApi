@@ -17,6 +17,10 @@ class Settings(BaseSettings):
     SECURITY_ALGORITHM: str
     SECURITY_ACCESS_TOKEN_EXPIRE_MINUTES: int
 
+    # SPOTIFY
+    CLIENT_ID: str
+    CLIENT_SECRET: str
+
     # SECRETS
     SECURITY_API_SECRET_KEY: str
 
