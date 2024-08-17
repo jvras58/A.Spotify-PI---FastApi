@@ -1,15 +1,14 @@
-from fastapi import APIRouter, HTTPException, Depends, Header
+from fastapi import APIRouter, HTTPException, Depends
 import requests
 from app.api.spotify.schemas import response_token, SpotifyType
 from app.utils.settings import get_settings
-from typing import Optional, Annotated
+from typing import Annotated
 from sqlalchemy.orm import Session
 from app.database.session import get_session
 from cachetools import TTLCache, cached
 
 router = APIRouter()
 
-# Evitar sobrescrever o nome Session
 db_session_type = Annotated[Session, Depends(get_session)]
 
 # Cache para armazenar o token por um período limitado (ex: 3600 segundos)
@@ -42,8 +41,6 @@ def get_spotify_api_token():
 def search_spotify_data_by_type(
     spotify_type: SpotifyType,
     spotify_search: str,
-    # db_session: db_session_type,  
-    # Authorization: Optional[str] = Header(None),
 ):
     """
     Obtem informações do catálogo do Spotify sobre álbuns e artistas que correspondem a uma sequência de palavras-chave.
@@ -54,9 +51,7 @@ def search_spotify_data_by_type(
     token_response = get_spotify_api_token()
     access_token = token_response["access_token"]
 
-    # FIXME: algo está errado para a url dinamica não funciona mas a url fixa funciona...
-    url= "https://api.spotify.com/v1/search?q=Thriller&type=album&limit=40"
-    # url = f"https://api.spotify.com/v1/search?q={spotify_search}&type={spotify_type}&limit=40"
+    url = f"https://api.spotify.com/v1/search?q={spotify_search}&type={spotify_type.value}&limit=40"
     headers = {"Authorization": f"Bearer {access_token}"}
     response = requests.get(url, headers=headers)
 
