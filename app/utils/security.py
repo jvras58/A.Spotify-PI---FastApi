@@ -1,22 +1,23 @@
+import logging
 from datetime import datetime, timedelta
 
+import requests
 from bcrypt import checkpw, gensalt, hashpw
 from fastapi import HTTPException
 from jose import jwt
-import requests
-import logging
+
 from app.utils.settings import get_settings
-
-
-
 
 # Obtém o logger
 logger = logging.getLogger(__name__)
 
+
 def create_access_token(data: dict) -> str:
     to_encode = data.copy()
     current_time = datetime.utcnow()
-    expire = current_time + timedelta(minutes=get_settings().SECURITY_ACCESS_TOKEN_EXPIRE_MINUTES)
+    expire = current_time + timedelta(
+        minutes=get_settings().SECURITY_ACCESS_TOKEN_EXPIRE_MINUTES
+    )
 
     to_encode.update({'exp': expire})
     to_encode.update({'nbf': current_time})
@@ -28,7 +29,7 @@ def create_access_token(data: dict) -> str:
         spotify_token = get_spotify_api_token()
         to_encode.update({'spotify_access_token': spotify_token.get('access_token')})
     except Exception as e:
-        logger.error(f"Acesso à API do Spotify não concedido: {str(e)}")
+        logger.error(f'Acesso à API do Spotify não concedido: {str(e)}')
     encoded_jwt = jwt.encode(
         to_encode,
         get_settings().SECURITY_API_SECRET_KEY,
@@ -37,15 +38,16 @@ def create_access_token(data: dict) -> str:
 
     return encoded_jwt
 
+
 def get_spotify_api_token():
     """
     Solicita token de API do Spotify
     """
-    url = "https://accounts.spotify.com/api/token"
+    url = 'https://accounts.spotify.com/api/token'
     spotify_client_data = {
-        "grant_type": "client_credentials",
-        "client_id": get_settings().CLIENT_ID, 
-        "client_secret": get_settings().CLIENT_SECRET
+        'grant_type': 'client_credentials',
+        'client_id': get_settings().CLIENT_ID,
+        'client_secret': get_settings().CLIENT_SECRET,
     }
     response = requests.post(url, data=spotify_client_data)
 
@@ -81,6 +83,7 @@ def extract_username(jwt_token: str) -> str:
         algorithms=[get_settings().SECURITY_ALGORITHM],
     )
     return payload.get('sub')
+
 
 def extract_spotify_token(jwt_token: str) -> str | None:
     """
