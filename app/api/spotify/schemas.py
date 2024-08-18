@@ -3,16 +3,12 @@ from enum import Enum
 from pydantic import BaseModel
 
 
-class response_token(BaseModel):
-    access_token: str
-    token_type: str
-    expires_in: int
-
-
-class Client_auth(BaseModel):
-    client_id: str
-    client_secret: str
-
+class ArtistInfo(BaseModel):
+    name: str
+    followers: int
+    popularity: int
+    audit_user_ip: str = None
+    audit_user_login: str = None
 
 class SpotifyType(str, Enum):
     artist = 'artist'
