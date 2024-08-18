@@ -12,7 +12,12 @@ from app.utils.exceptions import (
     CredentialsValidationException,
     IncorrectCredentialException,
 )
-from app.utils.security import create_access_token, extract_username, verify_password
+from app.utils.security import (
+    create_access_token,
+    extract_spotify_token,
+    extract_username,
+    verify_password,
+)
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl='auth/token')
 
@@ -37,10 +42,11 @@ def execute_user_login(db_session: Session, username: str, password: str) -> dic
 
 
 async def get_current_user(db_session: Session, token: OAuth2Token) -> User:
-
     token_data = TokenData()
     try:
         username = extract_username(token)
+        spotify_access_token = extract_spotify_token(token)
+
         if not username:
             raise CredentialsValidationException()
 
@@ -52,4 +58,8 @@ async def get_current_user(db_session: Session, token: OAuth2Token) -> User:
 
     if db_user is None:
         raise CredentialsValidationException()
+
+    # Armazena o token do Spotify no objeto do usuário
+    db_user.spotify_access_token = spotify_access_token
+
     return db_user

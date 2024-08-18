@@ -1,9 +1,15 @@
+import logging
 from datetime import datetime, timedelta
 
+import requests
 from bcrypt import checkpw, gensalt, hashpw
+from fastapi import HTTPException
 from jose import jwt
 
 from app.utils.settings import get_settings
+
+# Obtém o logger
+logger = logging.getLogger(__name__)
 
 
 def create_access_token(data: dict) -> str:
@@ -16,8 +22,14 @@ def create_access_token(data: dict) -> str:
     to_encode.update({'exp': expire})
     to_encode.update({'nbf': current_time})
     to_encode.update({'iat': current_time})
-    to_encode.update({'iss': 'FP-Backend'})
+    to_encode.update({'iss': 'Spotify-Backend'})
 
+    # Tenta obter o token do Spotify
+    try:
+        spotify_token = get_spotify_api_token()
+        to_encode.update({'spotify_access_token': spotify_token.get('access_token')})
+    except Exception as e:
+        logger.error(f'Acesso à API do Spotify não concedido: {str(e)}')
     encoded_jwt = jwt.encode(
         to_encode,
         get_settings().SECURITY_API_SECRET_KEY,
@@ -25,6 +37,24 @@ def create_access_token(data: dict) -> str:
     )
 
     return encoded_jwt
+
+
+def get_spotify_api_token():
+    """
+    Solicita token de API do Spotify
+    """
+    url = 'https://accounts.spotify.com/api/token'
+    spotify_client_data = {
+        'grant_type': 'client_credentials',
+        'client_id': get_settings().CLIENT_ID,
+        'client_secret': get_settings().CLIENT_SECRET,
+    }
+    response = requests.post(url, data=spotify_client_data)
+
+    if response.status_code != 200:
+        raise HTTPException(status_code=response.status_code, detail=response.json())
+
+    return response.json()
 
 
 def get_password_hash(password: str) -> bytes:
@@ -45,7 +75,7 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 
 def extract_username(jwt_token: str) -> str:
     """
-    docstring
+    Extrai o username (sub) do payload do JWT.
     """
     payload = jwt.decode(
         jwt_token,
@@ -53,3 +83,15 @@ def extract_username(jwt_token: str) -> str:
         algorithms=[get_settings().SECURITY_ALGORITHM],
     )
     return payload.get('sub')
+
+
+def extract_spotify_token(jwt_token: str) -> str | None:
+    """
+    Extrai o token de acesso do Spotify do payload do JWT.
+    """
+    payload = jwt.decode(
+        jwt_token,
+        get_settings().SECURITY_API_SECRET_KEY,
+        algorithms=[get_settings().SECURITY_ALGORITHM],
+    )
+    return payload.get('spotify_access_token')
