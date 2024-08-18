@@ -1,26 +1,35 @@
 from http import HTTPStatus
-from typing import List, Annotated
+from typing import Annotated, List
 
 import requests
 from cachetools import TTLCache, cached
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy.orm import Session
 
 from app.api.authentication.controller import get_current_user
-from app.api.spotify.schemas import ArtistInfo, SpotifyType
+from app.api.spotify.controller import ArtistController
+from app.api.spotify.schemas import ArtistInfoSchema, SpotifyType
 from app.database.session import get_session
+from app.models.artist import Artist
 from app.models.user import User
+from app.utils.exceptions import IntegrityValidationException
 
 router = APIRouter()
+artist_controller = ArtistController()
 
 db_session_type = Annotated[Session, Depends(get_session)]
 CurrentUser = Annotated[User, Depends(get_current_user)]
+
 
 token_cache = TTLCache(maxsize=1, ttl=3600)
 
 
 @cached(cache=token_cache)
-@router.get('/{spotify_type}/{spotify_search}', summary="Obter informações do catálogo do Spotify", response_model=dict)
+@router.get(
+    '/{spotify_type}/{spotify_search}',
+    summary='Obter informações do catálogo do Spotify',
+    response_model=dict,
+)
 def search_spotify_data_by_type(
     spotify_type: SpotifyType,
     spotify_search: str,
@@ -47,17 +56,21 @@ def search_spotify_data_by_type(
 
     return response.json()
 
-@cached(cache=token_cache)
-@router.get('/artists', response_model=List[ArtistInfo])
-def get_artists_info(
+
+@router.post('/artists', response_model=List[ArtistInfoSchema])
+def artists_info(
     current_user: CurrentUser,
-    artist_ids: List[str] = Query(..., description="Lista de IDs de artistas no Spotify"),
-) -> List[ArtistInfo]:
+    db_session: db_session_type,
+    request: Request,
+    artist_ids: List[str] = Query(
+        ..., description='Lista de IDs de artistas no Spotify'
+    ),
+) -> List[ArtistInfoSchema]:
     """
     Obtem informações processadas sobre uma lista de artistas usando seus IDs do Spotify.
-    
-    Retorna nome do artista, quantidade de seguidores e popularidade.
-    
+
+    Retorna nome do artista, quantidade de seguidores e popularidade e salva no banco
+
     - **artist_ids**: Uma lista de IDs de artistas no Spotify.
     """
     spotify_access_token = getattr(current_user, 'spotify_access_token', None)
@@ -65,13 +78,6 @@ def get_artists_info(
         raise HTTPException(
             status_code=HTTPStatus.UNAUTHORIZED,
             detail='Token do Spotify não encontrado.',
-        )
-
-    # FIXME: ponto morto isso nunca vai ser falso pois o Query obriga a passar as informações...
-    if not artist_ids:
-        raise HTTPException(
-            status_code=HTTPStatus.BAD_REQUEST,
-            detail='É necessário fornecer pelo menos um ID de artista.',
         )
 
     ids_str = ','.join(artist_ids)
@@ -88,14 +94,26 @@ def get_artists_info(
         raise HTTPException(status_code=response.status_code, detail=detail)
 
     data = response.json()
-    artists_info = []
+    created_artists = []
 
-    for artist in data.get('artists', []):
+    for artist_data in data.get('artists', []):
         artist_info = {
-            'name': artist.get('name'),
-            'followers': artist.get('followers', {}).get('total'),
-            'popularity': artist.get('popularity'),
+            'name': artist_data.get('name'),
+            'followers': artist_data.get('followers', {}).get('total'),
+            'popularity': artist_data.get('popularity'),
         }
-        artists_info.append(ArtistInfo(**artist_info))
 
-    return artists_info
+        new_artist_instance = Artist(**artist_info)
+        new_artist_instance.audit_user_ip = request.client.host
+        new_artist_instance.audit_user_login = current_user.username
+
+        try:
+            saved_artist = artist_controller.save(db_session, new_artist_instance)
+            created_artists.append(saved_artist)
+        except IntegrityValidationException as ex:
+            raise HTTPException(
+                status_code=HTTPStatus.BAD_REQUEST,
+                detail='Object Artist was not accepted',
+            ) from ex
+
+    return created_artists
