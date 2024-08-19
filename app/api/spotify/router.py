@@ -10,7 +10,6 @@ from app.api.authentication.controller import get_current_user
 from app.api.spotify.controller import ArtistController
 from app.api.spotify.schemas import ArtistInfoSchema, SpotifyType
 from app.database.session import get_session
-from app.models.artist import Artist
 from app.models.user import User
 from app.utils.exceptions import IntegrityValidationException
 
@@ -67,11 +66,7 @@ def artists_info(
     ),
 ) -> List[ArtistInfoSchema]:
     """
-    Obtem informações processadas sobre uma lista de artistas usando seus IDs do Spotify.
-
-    Retorna nome do artista, quantidade de seguidores e popularidade e salva no banco
-
-    - **artist_ids**: Uma lista de IDs de artistas no Spotify.
+    Cria novos artistas no banco de dados a partir de uma lista de IDs de artistas do Spotify.
     """
     spotify_access_token = getattr(current_user, 'spotify_access_token', None)
     if not spotify_access_token:
@@ -80,35 +75,21 @@ def artists_info(
             detail='Token do Spotify não encontrado.',
         )
 
-    ids_str = ','.join(artist_ids)
-    url = f'https://api.spotify.com/v1/artists?ids={ids_str}'
-    headers = {'Authorization': f'Bearer {spotify_access_token}'}
+    try:
+        artists = artist_controller.fetch_artists_info(spotify_access_token, artist_ids)
+    except HTTPException as ex:
+        raise HTTPException(
+            status_code=ex.status_code,
+            detail=ex.detail,
+        ) from ex
 
-    response = requests.get(url, headers=headers)
-
-    if response.status_code != 200:
-        try:
-            detail = response.json()
-        except ValueError:
-            detail = response.text
-        raise HTTPException(status_code=response.status_code, detail=detail)
-
-    data = response.json()
     created_artists = []
-
-    for artist_data in data.get('artists', []):
-        artist_info = {
-            'name': artist_data.get('name'),
-            'followers': artist_data.get('followers', {}).get('total'),
-            'popularity': artist_data.get('popularity'),
-        }
-
-        new_artist_instance = Artist(**artist_info)
-        new_artist_instance.audit_user_ip = request.client.host
-        new_artist_instance.audit_user_login = current_user.username
+    for artist in artists:
+        artist.audit_user_ip = request.client.host
+        artist.audit_user_login = current_user.username
 
         try:
-            saved_artist = artist_controller.save(db_session, new_artist_instance)
+            saved_artist = artist_controller.save(db_session, artist)
             created_artists.append(saved_artist)
         except IntegrityValidationException as ex:
             raise HTTPException(
