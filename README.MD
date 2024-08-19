@@ -62,27 +62,9 @@ $ task run
 |
 ├── 📁app  ->  [Implementação da API]
 │   ├── 📁api
-│   │   ├── 📁assignment
-│   │   │   ├── 🐍 router.py
-│   │   │   └── 🐍 schemas.py
 │   │       ...
 │   │   ├── 📁authentication
 │   │   │   ├── 🐍 controller.py
-│   │   │   ├─  🐍 router.py
-│   │   │   └── 🐍 schemas.py
-│   │       ...
-│   │   ├── 📁authorization
-│   │   │   ├── 🐍 controller.py
-│   │   │   ├── 🐍 middleware.py
-│   │   │   ├─  🐍 router.py
-│   │   │   └── 🐍 schemas.py
-│   │   │   ...
-│   │   ├── 📁role
-│   │   │   ├─  🐍 router.py
-│   │   │   └── 🐍 schemas.py
-│   │   │   ...
-│   │   ├── 📁transaction
-│   │   │   ├── enum_operation_code.py
 │   │   │   ├─  🐍 router.py
 │   │   │   └── 🐍 schemas.py
 │   │   │   ...
@@ -95,11 +77,8 @@ $ task run
 │   │   └── 🐍 session.py
 │   │      ...
 │   ├── 📁models
-│   │   ├── 🐍 assignment.py
-│   │   ├── 🐍 authorization.py
 │   │   ├── 🐍 __init__.py -> [Mapeamento de classes SQLALCHEMY]
-│   │   ├── 🐍 role.py
-│   │   ├── 🐍 transaction.py
+│   │   ├── 🐍 artist.py
 │   │   └── 🐍 user.py
 │   │       ...
 │   ├── 🐍 startup.py
@@ -124,18 +103,10 @@ $ task run
 └── 📁 tests ->  [Testes da aplicação]
     ├── 🐍 conftest.py  ->  [configuração do ambiente de testes / fixtures.]
     ├── factory
-    │   ├── 🐍 assignment_factory.py
-    │   ├── 🐍 authorization_factory.py
-    │   ├── 🐍 role_factory.py
-    │   ├── 🐍 trasaction_factory.py
     │   └── 🐍 user_factory.py
     │      ...
-    ├── 🐍 test_assignment.py
     ├── 🐍 test_authentication.py
-    ├── 🐍 test_authorization.py
-    ├── 🐍 test_role.py
     ├── 🐍 test_startup.py
-    ├── 🐍 test_transactions.py
     └── 🐍 test_users.py
 ├── 📄alembic.ini
 ```

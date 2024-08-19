@@ -45,18 +45,18 @@ def test_create_user_success(client):
     response = client.post(
         '/users/',
         json={
-            'username': 'Marlos',
-            'display_name': 'Marlos Ribeiro',
-            'email': 'marlos@ufpe.br',
+            'username': 'teste',
+            'display_name': 'teste Ribeiro',
+            'email': 'teste@cin.br',
             'password': 'Qwert123',
         },
     )
 
     assert response.status_code == 201
     assert response.json()['id']
-    assert response.json()['username'] == 'Marlos'
-    assert response.json()['display_name'] == 'Marlos Ribeiro'
-    assert response.json()['email'] == 'marlos@ufpe.br'
+    assert response.json()['username'] == 'teste'
+    assert response.json()['display_name'] == 'teste Ribeiro'
+    assert response.json()['email'] == 'teste@cin.br'
     assert 'password' not in response.json()
 
 

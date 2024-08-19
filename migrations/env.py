@@ -27,11 +27,7 @@ from app.utils.base_model import Base
 
 app_models = [
     'app.models.user',
-    'app.models.role',
     'app.models.artist',
-    'app.models.transaction',
-    'app.models.assignment',
-    'app.models.authorization',
 ]
 
 for module in app_models:
