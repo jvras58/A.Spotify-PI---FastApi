@@ -1,5 +1,5 @@
 <h1 align="center">
-  <a href="#">Projeto de Estudos com FASTAPI</a>
+  <a href="#">Projeto do Desafio Mock Api com FASTAPI</a>
 </h1>
 
 <p align="center">
