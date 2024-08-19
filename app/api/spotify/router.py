@@ -1,15 +1,15 @@
 from http import HTTPStatus
 from typing import Annotated, List
 
-import requests
-from cachetools import TTLCache, cached
+
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy.orm import Session
 
 from app.api.authentication.controller import get_current_user
 from app.api.spotify.controller import ArtistController
-from app.api.spotify.schemas import ArtistInfoSchema, SpotifyType
+from app.api.spotify.schemas import ArtistSchema, ArtistList, SpotifyType
 from app.database.session import get_session
+from app.models.artist import Artist
 from app.models.user import User
 from app.utils.exceptions import IntegrityValidationException
 
@@ -19,17 +19,29 @@ artist_controller = ArtistController()
 db_session_type = Annotated[Session, Depends(get_session)]
 CurrentUser = Annotated[User, Depends(get_current_user)]
 
+@router.get('/', response_model=ArtistList)
+def read_artists(db_session: db_session_type, skip: int = 0, limit: int = 100):
+    """
+    Retorna uma lista de artistas do banco de dados.
+    """
+    # TODO: Implementar filtros de pesquisa funcional no get_all
+    # criterias = {'genre': 'pop'}
+    criterias = {}
+    artists: list[Artist] = artist_controller.get_all(db_session, skip, limit, **criterias)
+    return {'artists': artists}
 
-token_cache = TTLCache(maxsize=1, ttl=3600)
+@router.get('/{artist_id}', response_model=ArtistSchema)
+def gey_artist_by_id(db_session: db_session_type, artist_id: str):
+    """
+    Retorna um artista específico do banco de dados pelo seu ID.
+    """
+    return artist_controller.get(db_session, artist_id)
 
-
-@cached(cache=token_cache)
 @router.get(
     '/{spotify_type}/{spotify_search}',
-    summary='Obter informações do catálogo do Spotify',
     response_model=dict,
 )
-def search_spotify_data_by_type(
+async def search_spotify_data_by_type(
     spotify_type: SpotifyType,
     spotify_search: str,
     current_user: CurrentUser,
@@ -39,32 +51,66 @@ def search_spotify_data_by_type(
     """
 
     spotify_access_token = getattr(current_user, 'spotify_access_token', None)
-    print(spotify_access_token)
     if not spotify_access_token:
         raise HTTPException(
             status_code=HTTPStatus.UNAUTHORIZED,
             detail='Token do Spotify não encontrado.',
         )
 
-    url = f'https://api.spotify.com/v1/search?q={spotify_search}&type={spotify_type.value}&limit=40'
-    headers = {'Authorization': f'Bearer {spotify_access_token}'}
-    response = requests.get(url, headers=headers)
-
-    if response.status_code != 200:
-        raise HTTPException(status_code=response.status_code, detail=response.json())
-
-    return response.json()
+    return await artist_controller.get_spotify_data(spotify_type, spotify_search, spotify_access_token)
 
 
-@router.post('/artists', response_model=List[ArtistInfoSchema])
-def artists_info(
+@router.post('/artist', status_code=201, response_model=ArtistSchema)
+async def add_new_artist(
+    current_user: CurrentUser,
+    db_session: db_session_type,
+    request: Request,
+    artist_id: str = Query(..., description='ID do artista no Spotify')
+) -> ArtistSchema:
+    """
+    Cria um novo artista no banco de dados a partir de um ID de artista do Spotify.
+    """
+    spotify_access_token = getattr(current_user, 'spotify_access_token', None)
+    if not spotify_access_token:
+        raise HTTPException(
+            status_code=HTTPStatus.UNAUTHORIZED,
+            detail='Token do Spotify não encontrado.',
+        )
+
+    try:
+        artists = await artist_controller.fetch_artists_info(spotify_access_token, [artist_id])
+        if not artists:
+            raise HTTPException(
+                status_code=HTTPStatus.NOT_FOUND,
+                detail=f'Artista com ID {artist_id} não encontrado.',
+            )
+        artist = artists[0]
+    except HTTPException as ex:
+        raise HTTPException(
+            status_code=ex.status_code,
+            detail=ex.detail,
+        ) from ex
+
+    artist.audit_user_ip = request.client.host
+    artist.audit_user_login = current_user.username
+
+    try:
+        return artist_controller.save(db_session, artist)
+    except IntegrityValidationException as ex:
+        raise HTTPException(
+            status_code=HTTPStatus.BAD_REQUEST,
+            detail='Object Artist was not accepted',
+        ) from ex
+
+@router.post('/artists', status_code=201, response_model=List[ArtistSchema])
+async def add_new_artists(
     current_user: CurrentUser,
     db_session: db_session_type,
     request: Request,
     artist_ids: List[str] = Query(
         ..., description='Lista de IDs de artistas no Spotify'
     ),
-) -> List[ArtistInfoSchema]:
+) -> List[ArtistSchema]:
     """
     Cria novos artistas no banco de dados a partir de uma lista de IDs de artistas do Spotify.
     """
@@ -75,13 +121,7 @@ def artists_info(
             detail='Token do Spotify não encontrado.',
         )
 
-    try:
-        artists = artist_controller.fetch_artists_info(spotify_access_token, artist_ids)
-    except HTTPException as ex:
-        raise HTTPException(
-            status_code=ex.status_code,
-            detail=ex.detail,
-        ) from ex
+    artists = await artist_controller.fetch_artists_info(spotify_access_token, artist_ids)
 
     created_artists = []
     for artist in artists:
@@ -94,7 +134,7 @@ def artists_info(
         except IntegrityValidationException as ex:
             raise HTTPException(
                 status_code=HTTPStatus.BAD_REQUEST,
-                detail='Object Artist was not accepted',
+                detail='objeto Artist não foi aceito',
             ) from ex
 
     return created_artists
