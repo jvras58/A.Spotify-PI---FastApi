@@ -1,6 +1,6 @@
 from http import HTTPStatus
 from typing import Annotated, List
-
+from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy.orm import Session
@@ -20,14 +20,26 @@ db_session_type = Annotated[Session, Depends(get_session)]
 CurrentUser = Annotated[User, Depends(get_current_user)]
 
 @router.get('/', response_model=ArtistList)
-def read_artists(db_session: db_session_type, skip: int = 0, limit: int = 100):
+def read_artists(
+    db_session: db_session_type, 
+    skip: int = 0, 
+    limit: int = 100, 
+    genre: Optional[str] = Query(None),
+    order_by: Optional[str] = Query(None)
+):
     """
     Retorna uma lista de artistas do banco de dados.
     """
-    # TODO: Implementar filtros de pesquisa funcional no get_all
-    # criterias = {'genre': 'pop'}
     criterias = {}
-    artists: list[Artist] = artist_controller.get_all(db_session, skip, limit, **criterias)
+    if genre:
+        criterias['genre'] = genre
+
+    order = None
+    # TODO: ordena em ordem decrescente (do maior para o menor) precisa ser colocado "followers" para pegar
+    if order_by == 'followers':
+        order = 'followers DESC'
+
+    artists: list[Artist] = artist_controller.get_all(db_session, skip, limit, order=order, **criterias)
     return {'artists': artists}
 
 @router.get('/{artist_id}', response_model=ArtistSchema)
