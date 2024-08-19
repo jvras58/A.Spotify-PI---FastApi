@@ -1,12 +1,7 @@
-from typing import TYPE_CHECKING, List
-
 from sqlalchemy import Index
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column
 
 from app.utils.base_model import AbstractBaseModel
-
-if TYPE_CHECKING:
-    from app.models.assignment import Assignment
 
 
 class User(AbstractBaseModel):
@@ -22,9 +17,6 @@ class User(AbstractBaseModel):
     password: Mapped[str] = mapped_column(name='str_password')
     email: Mapped[str] = mapped_column(name='str_email')
 
-    assignments: Mapped[List['Assignment']] = relationship(
-        back_populates='user', lazy='subquery'
-    )
     __table_args__ = (
         Index('idx_user_username', username, unique=True),
         Index('idx_user_email', email, unique=True),

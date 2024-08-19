@@ -64,10 +64,10 @@ class IllegalAccessExcetion(HTTPException):
     Representa um erro de acesso ilegal.
     """
 
-    def __init__(self, user_id: int, op_code: str):
+    def __init__(self, user_id: int):
         super().__init__(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=f'User[{user_id}] not authorized to access Transaction[{op_code}]',
+            detail=f'User[{user_id}] not authorized to access]',
             headers={'WWW-Authenticate': 'Bearer'},
         )
 
