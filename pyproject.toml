@@ -4,7 +4,7 @@ version = "0.0.1"
 description = "Back-end of a Spotify clone using FastAPI"
 authors = ["jvras <jvras@cin.ufpe.br>"]
 readme = "README.md"
-package-mode = false
+
 
 [tool.poetry.dependencies]
 python = "^3.11"
@@ -52,7 +52,7 @@ line_length = 88
 [tool.taskipy.tasks]
 lint = 'ruff check . && blue --check . --diff'
 format = 'blue .  && isort .'
-run = 'uvicorn app.startup:app --host 0.0.0.0 --port 8000 --reload'
+run = 'fastapi dev app/startup.py --reload'
 pre_test = 'task lint'
 test = 'pytest -s -x --cov=app -vv'
 post_test = 'coverage html'

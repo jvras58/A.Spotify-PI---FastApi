@@ -1,9 +1,11 @@
-from sqlalchemy import String, and_, select
+from typing import Optional
+
+from sqlalchemy import String, and_, desc, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app.utils.base_model import AbstractBaseModel
-from app.utils.exceptions import IntegrityValidationException, ObjectNotFoundException
+from utils.base_model import AbstractBaseModel
+from utils.exceptions import IntegrityValidationException, ObjectNotFoundException
 
 
 class GenericController:
@@ -18,7 +20,12 @@ class GenericController:
         return instance
 
     def get_all(
-        self, db_session: Session, skip: int = 0, limit: int = 100, **kwargs
+        self,
+        db_session: Session,
+        skip: int = 0,
+        limit: int = 100,
+        order: Optional[str] = None,
+        **kwargs,
     ) -> list[AbstractBaseModel]:
         query = select(self.model)
         if kwargs:
@@ -31,6 +38,13 @@ class GenericController:
                     criteria_and.append(field == value)
 
             query = query.filter(and_(*criteria_and))
+
+        if order:
+            order_field = getattr(self.model, order.split()[0])
+            if 'DESC' in order.upper():
+                query = query.order_by(desc(order_field))
+            else:
+                query = query.order_by(order_field)
 
         return db_session.scalars(query.offset(skip).limit(limit)).all()
 

@@ -1,7 +1,7 @@
 from sqlalchemy import Index
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.utils.base_model import AbstractBaseModel
+from utils.base_model import AbstractBaseModel
 
 
 class User(AbstractBaseModel):

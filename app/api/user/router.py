@@ -4,13 +4,13 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi import status as HTTP_STATUS
 from sqlalchemy.orm import Session
 
-from app.api.authentication.controller import get_current_user
-from app.api.user.controller import UserController
-from app.api.user.schemas import UserList, UserPublic, UserSchema
-from app.database.session import get_session
-from app.models.user import User
-from app.utils.base_schemas import SimpleMessageSchema
-from app.utils.exceptions import IntegrityValidationException, ObjectNotFoundException
+from api.authentication.controller import get_current_user
+from api.user.controller import UserController
+from api.user.schemas import UserList, UserPublic, UserSchema
+from database.session import get_session
+from models.user import User
+from utils.base_schemas import SimpleMessageSchema
+from utils.exceptions import IntegrityValidationException, ObjectNotFoundException
 
 router = APIRouter()
 user_controller = UserController()

@@ -1,9 +1,9 @@
-from fastapi import FastAPI  # , Request
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.authentication.router import router as auth_router
-from app.api.spotify.router import router as spotify_router
-from app.api.user.router import router as user_router
+from api.authentication.router import router as auth_router
+from api.spotify.router import router as spotify_router
+from api.user.router import router as user_router
 
 app = FastAPI()
 
