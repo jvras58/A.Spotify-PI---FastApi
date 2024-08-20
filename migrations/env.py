@@ -1,6 +1,7 @@
 import importlib
 from logging.config import fileConfig
-
+import os
+import sys
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
@@ -23,18 +24,20 @@ if config.config_file_name is not None:
 # target_metadata = mymodel.Base.metadata
 # LOADIND MODELS -----------
 
+sys.path.append('/workspace/app')
+
 from app.utils.base_model import Base
 
-app_models = [
-    'app.models.user',
-    'app.models.artist',
-]
-
-for module in app_models:
-    try:
-        loaded_module = importlib.import_module(module)
-    except ModuleNotFoundError:
-        print(f'Could not import module {module}') # TODO: log this
+# Load all entities from the model package
+entities_directory = '/workspace/app/models'
+files = os.listdir(entities_directory)
+# Filtra apenas os arquivos .py
+modules = [f[:-3] for f in files if f.endswith('.py') and not f.startswith('__')]
+# Importa os módulos
+for module in modules:
+    module_path = f"models.{module}"
+    importlib.import_module(module_path)
+    print(f"Module {module_path} imported.")
 
 target_metadata = Base.metadata
 # --------------------------

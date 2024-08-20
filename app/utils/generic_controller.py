@@ -3,7 +3,6 @@ from typing import Optional
 from sqlalchemy import String, and_, desc, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
-
 from utils.base_model import AbstractBaseModel
 from utils.exceptions import IntegrityValidationException, ObjectNotFoundException
 
