@@ -5,11 +5,11 @@ import httpx
 from fastapi import HTTPException
 from sqlalchemy import select
 
-from app.api.spotify.schemas import SpotifyType
-from app.database.session import Session
-from app.models.artist import Artist
-from app.utils.base_model import AbstractBaseModel
-from app.utils.generic_controller import GenericController
+from api.spotify.schemas import SpotifyType
+from database.session import Session
+from models.artist import Artist
+from utils.base_model import AbstractBaseModel
+from utils.generic_controller import GenericController
 
 
 class ArtistController(GenericController):

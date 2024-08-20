@@ -3,10 +3,10 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 
-from app.api.authentication.controller import execute_user_login
-from app.api.authentication.schemas import AccessToken
-from app.database.session import Session, get_session
-from app.utils.exceptions import IncorrectCredentialException
+from api.authentication.controller import execute_user_login
+from api.authentication.schemas import AccessToken
+from database.session import Session, get_session
+from utils.exceptions import IncorrectCredentialException
 
 router = APIRouter()
 
