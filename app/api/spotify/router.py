@@ -2,15 +2,14 @@ from collections import Counter
 from http import HTTPStatus
 from typing import Annotated, List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request
-from sqlalchemy.orm import Session
-
 from api.authentication.controller import get_current_user
 from api.spotify.controller import ArtistController
 from api.spotify.schemas import ArtistList, ArtistSchema, SpotifyType, TopGenresdict
 from database.session import get_session
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from models.artist import Artist
 from models.user import User
+from sqlalchemy.orm import Session
 from utils.exceptions import IntegrityValidationException
 
 router = APIRouter()
@@ -107,51 +106,6 @@ async def search_spotify_data_by_type(
     return await artist_controller.get_spotify_data(
         spotify_type, spotify_search, spotify_access_token
     )
-
-
-@router.post('/artist', status_code=201, response_model=ArtistSchema)
-async def add_new_artist(
-    current_user: CurrentUser,
-    db_session: db_session_type,
-    request: Request,
-    artist_id: str = Query(..., description='ID do artista no Spotify'),
-) -> ArtistSchema:
-    """
-    Cria um novo artista no banco de dados a partir de um ID de artista do Spotify.
-    """
-    spotify_access_token = getattr(current_user, 'spotify_access_token', None)
-    if not spotify_access_token:
-        raise HTTPException(
-            status_code=HTTPStatus.UNAUTHORIZED,
-            detail='Token do Spotify não encontrado.',
-        )
-
-    try:
-        artists = await artist_controller.fetch_artists_info(
-            spotify_access_token, [artist_id]
-        )
-        if not artists:
-            raise HTTPException(
-                status_code=HTTPStatus.NOT_FOUND,
-                detail=f'Artista com ID {artist_id} não encontrado.',
-            )
-        artist = artists[0]
-    except HTTPException as ex:
-        raise HTTPException(
-            status_code=ex.status_code,
-            detail=ex.detail,
-        ) from ex
-
-    artist.audit_user_ip = request.client.host
-    artist.audit_user_login = current_user.username
-
-    try:
-        return artist_controller.save(db_session, artist)
-    except IntegrityValidationException as ex:
-        raise HTTPException(
-            status_code=HTTPStatus.BAD_REQUEST,
-            detail='Object Artist was not accepted',
-        ) from ex
 
 
 @router.post('/artists', status_code=201, response_model=List[ArtistSchema])
