@@ -4,7 +4,7 @@ from typing import Annotated, List, Optional
 
 from api.authentication.controller import get_current_user
 from api.spotify.controller import ArtistController
-from api.spotify.schemas import ArtistList, ArtistSchema, SpotifyType, TopGenresdict
+from api.spotify.schemas import ArtistList, ArtistSchema, OrderType, SpotifyType, TopGenresdict
 from database.session import get_session
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from models.artist import Artist
@@ -25,18 +25,18 @@ def read_artists(
     skip: int = 0,
     limit: int = 100,
     genre: Optional[str] = Query(None),
-    order_by: Optional[str] = Query(None),
+    order_by: Optional[OrderType] = Query(None),
 ):
     """
     Retorna uma lista de artistas do banco de dados.
+    Pode ser filtrada por gênero e/ou ordenada por número de seguidores[followers].
     """
     criterias = {}
     if genre:
         criterias['genre'] = genre
 
     order = None
-    # TODO: ordena em ordem decrescente (do maior para o menor) precisa ser colocado "followers" para pegar
-    if order_by == 'followers':
+    if order_by == OrderType.followers:
         order = 'followers DESC'
 
     artists: list[Artist] = artist_controller.get_all(

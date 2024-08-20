@@ -36,3 +36,6 @@ class TopGenresdict(BaseModel):
 class SpotifyType(str, Enum):
     artist = 'artist'
     album = 'album'
+
+class OrderType(str, Enum):
+    followers = "followers"
