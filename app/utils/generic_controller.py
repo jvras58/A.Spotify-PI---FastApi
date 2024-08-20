@@ -1,5 +1,6 @@
 from typing import Optional
-from sqlalchemy import String, and_, select, desc
+
+from sqlalchemy import String, and_, desc, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -19,28 +20,33 @@ class GenericController:
         return instance
 
     def get_all(
-            self, db_session: Session, skip: int = 0, limit: int = 100, order: Optional[str] = None, **kwargs
-        ) -> list[AbstractBaseModel]:
-            query = select(self.model)
-            if kwargs:
-                criteria_and = []
-                for key, value in kwargs.items():
-                    field = getattr(self.model, key)
-                    if isinstance(field.property.columns[0].type, String):
-                        criteria_and.append(field.ilike(f'%{value}%'))
-                    else:
-                        criteria_and.append(field == value)
-
-                query = query.filter(and_(*criteria_and))
-
-            if order:
-                order_field = getattr(self.model, order.split()[0])
-                if 'DESC' in order.upper():
-                    query = query.order_by(desc(order_field))
+        self,
+        db_session: Session,
+        skip: int = 0,
+        limit: int = 100,
+        order: Optional[str] = None,
+        **kwargs,
+    ) -> list[AbstractBaseModel]:
+        query = select(self.model)
+        if kwargs:
+            criteria_and = []
+            for key, value in kwargs.items():
+                field = getattr(self.model, key)
+                if isinstance(field.property.columns[0].type, String):
+                    criteria_and.append(field.ilike(f'%{value}%'))
                 else:
-                    query = query.order_by(order_field)
+                    criteria_and.append(field == value)
 
-            return db_session.scalars(query.offset(skip).limit(limit)).all()
+            query = query.filter(and_(*criteria_and))
+
+        if order:
+            order_field = getattr(self.model, order.split()[0])
+            if 'DESC' in order.upper():
+                query = query.order_by(desc(order_field))
+            else:
+                query = query.order_by(order_field)
+
+        return db_session.scalars(query.offset(skip).limit(limit)).all()
 
     def delete(self, db_session: Session, id: int) -> None:
         instance = self.get(db_session, id)

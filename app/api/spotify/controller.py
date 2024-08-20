@@ -1,5 +1,6 @@
 from http import HTTPStatus
 from typing import List
+
 import httpx
 from fastapi import HTTPException
 from sqlalchemy import select
@@ -17,15 +18,19 @@ class ArtistController(GenericController):
 
     def get_artist_by_name(self, db_session: Session, name: str) -> Artist:
         return db_session.scalar(select(Artist).where(Artist.name == name))
-    
-    async def get_spotify_data(self, spotify_type: SpotifyType, spotify_search: str, spotify_access_token: str) -> dict:
+
+    async def get_spotify_data(
+        self, spotify_type: SpotifyType, spotify_search: str, spotify_access_token: str
+    ) -> dict:
         url = f'https://api.spotify.com/v1/search?q={spotify_search}&type={spotify_type.value}&limit=40'
         headers = {'Authorization': f'Bearer {spotify_access_token}'}
         async with httpx.AsyncClient() as client:
             response = await client.get(url, headers=headers)
 
         if response.status_code != 200:
-            raise HTTPException(status_code=response.status_code, detail=response.json())
+            raise HTTPException(
+                status_code=response.status_code, detail=response.json()
+            )
 
         return response.json()
 
