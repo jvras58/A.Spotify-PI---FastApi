@@ -11,6 +11,9 @@ class ArtistSchema(BaseModel):
     audit_user_ip: str = None
     audit_user_login: str = None
 
+    class Config:
+        from_attributes = True
+
 
 class ArtistList(BaseModel):
     """

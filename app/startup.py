@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from api.authentication.router import router as auth_router
 from api.spotify.router import router as spotify_router
+from api.ranking.router import router as ranking_router
 from api.user.router import router as user_router
 
 app = FastAPI()
@@ -27,6 +28,7 @@ app.add_middleware(
 app.include_router(user_router, prefix='/users', tags=['Users'])
 app.include_router(auth_router, prefix='/auth', tags=['Auth'])
 app.include_router(spotify_router, prefix='/spotify', tags=['Spotify'])
+app.include_router(ranking_router, prefix='/ranking', tags=['Ranking'])
 # ----------------------------------
 
 
