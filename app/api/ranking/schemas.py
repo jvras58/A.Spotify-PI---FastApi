@@ -31,10 +31,16 @@ class RankingList(BaseModel):
 
 
 class GenreRanking(BaseModel):
+    """
+    Representa o ranking de gêneros.
+    """
     id: int
-    genre_ranking: str
+    genre_ranking: List[str]
 
 
 class TopRanking(BaseModel):
+    """
+    Representa o top_ranking pelos gêneros.
+    """
     id: int
-    top_ranking: str
+    top_ranking: Optional[List[ArtistRanking]]

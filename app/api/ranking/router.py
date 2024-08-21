@@ -31,7 +31,7 @@ def read_rankings(
 
 
 @router.get('/get_genre_ranking', response_model=List[GenreRanking])
-def get_genre_ranking(db_session: db_session_type) -> List[GenreRanking]:
+def get_genre_ranking(db_session: db_session_type)-> List[GenreRanking]:
     """
     Retorna o genre_ranking do banco de dados.
     """
@@ -47,9 +47,12 @@ def get_genre_ranking(db_session: db_session_type) -> List[GenreRanking]:
     return genre_ranking_list
 
 
-@router.get('/get_top_ranking', response_model=List[TopRanking])
+@router.get(
+    '/get_top_ranking',
+    response_model=List[TopRanking],
+) 
 def get_top_ranking(db_session: db_session_type) -> List[TopRanking]:
-    """Retorna o top_ranking do banco de dados."""
+    """Retorna o top_ranking por genero do banco de dados."""
     rankings = ranking_controller.get_all(db_session)
     if not rankings:
         raise HTTPException(status_code=404, detail='Classificação não encontrada')
