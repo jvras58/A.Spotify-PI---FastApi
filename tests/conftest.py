@@ -3,8 +3,10 @@ from fastapi.testclient import TestClient
 from sqlalchemy import Engine, create_engine, event
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
-
+from unittest.mock import patch
+from app.api.spotify.controller import ArtistController
 from app.database.session import get_session
+from app.models.artist import Artist
 from app.models.user import User
 from app.startup import app
 from app.utils.base_model import Base
@@ -144,3 +146,41 @@ def token(client, user):
         data={'username': user.username, 'password': user.clear_password},
     )
     return response.json()['access_token']
+
+# TODO: refatorar para tbm ter um factory de artistas
+@pytest.fixture
+def Spotify(session):
+    """
+    Cria uma ingessão de Spotify para os testes.
+
+    Args:
+        session (Session): Uma instância de Session do SQLAlchemy.
+
+    Returns:
+        Spotify: Uma instância de Spotify do sistema.
+    """
+
+    artist = Artist(
+        name='Teste',
+        genre='Pop',
+        popularity=10,
+        followers=100,
+        artist_id='1',
+        audit_user_ip='0.0.0.0',
+        audit_user_login='tester',
+    )
+    session.add(artist)
+    session.commit()
+    session.refresh(artist)
+
+    return artist
+
+@pytest.fixture
+def mock_get_spotify_data():
+    with patch.object(ArtistController, 'get_spotify_data') as mock:
+        yield mock
+
+@pytest.fixture
+def mock_fetch_artists_info():
+    with patch.object(ArtistController, 'fetch_artists_info') as mock:
+        yield mock
