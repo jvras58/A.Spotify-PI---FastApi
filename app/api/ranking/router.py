@@ -1,14 +1,12 @@
-from fastapi import Request
-from typing import Annotated, Optional
+from typing import Annotated, List, Optional
 
 from api.authentication.controller import get_current_user
-
-from api.spotify.schemas import OrderType
 from api.ranking.controller import RankingController
-from api.ranking.schemas import RankingList, RankingResponse
-from models.ranking import Ranking
+from api.ranking.schemas import GenreRanking, RankingList, RankingResponse, TopRanking
+from api.spotify.schemas import OrderType
 from database.session import get_session
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from models.ranking import Ranking
 from models.user import User
 from sqlalchemy.orm import Session
 
@@ -31,6 +29,39 @@ def read_rankings(
     rankings = ranking_controller.get_all(db_session, skip, limit)
     return {'rankings': rankings}
 
+
+@router.get('/get_genre_ranking', response_model=List[GenreRanking])
+def get_genre_ranking(db_session: db_session_type) -> List[GenreRanking]:
+    """
+    Retorna o genre_ranking do banco de dados.
+    """
+    rankings = ranking_controller.get_all(db_session)
+    if not rankings:
+        raise HTTPException(status_code=404, detail='Top 5 gêneros não encontrada')
+
+    genre_ranking_list = [
+        {'id': ranking.id, 'genre_ranking': ranking.genre_ranking}
+        for ranking in rankings
+        if ranking.genre_ranking
+    ]
+    return genre_ranking_list
+
+
+@router.get('/get_top_ranking', response_model=List[TopRanking])
+def get_top_ranking(db_session: db_session_type) -> List[TopRanking]:
+    """Retorna o top_ranking do banco de dados."""
+    rankings = ranking_controller.get_all(db_session)
+    if not rankings:
+        raise HTTPException(status_code=404, detail='Classificação não encontrada')
+
+    top_ranking_list = [
+        {'id': ranking.id, 'top_ranking': ranking.top_genre_ranking}
+        for ranking in rankings
+        if ranking.top_genre_ranking
+    ]
+    return top_ranking_list
+
+
 @router.post('/save_ranking', status_code=201, response_model=RankingResponse)
 def save_full_ranking(
     db_session: db_session_type,
@@ -42,7 +73,7 @@ def save_full_ranking(
     order_by: Optional[OrderType] = Query(None),
 ) -> RankingResponse:
     """
-    Obtém uma lista de artistas e o top 5 de gêneros mais comuns do banco de dados, 
+    Obtém uma lista de artistas e o top 5 de gêneros mais comuns do banco de dados,
     e salva como JSON nos campos `genre_ranking` e `top_genre_ranking` na tabela `Rankings`.
     """
     criterias = {}
@@ -53,14 +84,16 @@ def save_full_ranking(
     if order_by == OrderType.followers:
         order = 'followers DESC'
 
-    artists_data = ranking_controller.get_artists(db_session, skip, limit, order, **criterias)
+    artists_data = ranking_controller.get_artists(
+        db_session, skip, limit, order, **criterias
+    )
     genre_ranking, top_ranking = ranking_controller.create_ranking(artists_data)
 
     ranking = Ranking(
         genre_ranking=genre_ranking,
         top_genre_ranking=top_ranking,
         genre_select=genre,
-        order_by=order_by
+        order_by=order_by,
     )
     ranking.audit_user_ip = request.client.host
     ranking.audit_user_login = current_user.username
