@@ -23,6 +23,8 @@ def upgrade() -> None:
         sa.Column('id', sa.Integer(), nullable=False),
         sa.Column('ranking_genero', sa.JSON(), nullable=True),
         sa.Column('ranking_top_genero', sa.JSON(), nullable=True),
+        sa.Column('genere_selecionado', sa.String(), nullable=True),
+        sa.Column('order_by', sa.String(), nullable=True),
         sa.Column('audit_user_ip', sa.String(length=16), nullable=False),
         sa.Column('audit_created_at', sa.DateTime(timezone=True), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=False),
         sa.Column('audit_updated_on', sa.DateTime(timezone=True), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=False),

@@ -5,6 +5,7 @@ from api.authentication.controller import get_current_user
 
 from api.spotify.schemas import OrderType
 from api.ranking.controller import RankingController
+from api.ranking.schemas import RankingList, RankingResponse
 from models.ranking import Ranking
 from database.session import get_session
 from fastapi import APIRouter, Depends, Query
@@ -18,68 +19,19 @@ ranking_controller = RankingController()
 db_session_type = Annotated[Session, Depends(get_session)]
 CurrentUser = Annotated[User, Depends(get_current_user)]
 
-@router.get('/get_all_rankings')
-def read_artists_rankings(
+@router.get('/get_all_rankings', response_model=RankingList)
+def read_rankings(
     db_session: db_session_type,
     skip: int = 0,
     limit: int = 100,
-    genre: Optional[str] = Query(None),
-    order_by: Optional[OrderType] = Query(None),
-):
+) -> RankingList:
     """
     Obtém uma lista dos rankings `top_genre` e `ranking_artist_genre` do banco de dados.
     """
-    criterias = {}
-    if genre:
-        criterias['genre'] = genre
-
-    rankings = ranking_controller.get_all(db_session, skip, limit, order_by, **criterias)
+    rankings = ranking_controller.get_all(db_session, skip, limit)
     return {'rankings': rankings}
 
-@router.get('/get_genre_ranking')
-def get_genre_ranking(
-    db_session: db_session_type,
-    skip: int = 0,
-    limit: int = 100,
-    genre: Optional[str] = Query(None),
-    order_by: Optional[OrderType] = Query(None),
-):
-    """
-    Obtém o ranking de gêneros do banco de dados.
-    """
-    criterias = {}
-    if genre:
-        criterias['genre'] = genre
-
-    rankings = ranking_controller.get_all(db_session, skip, limit, order_by, **criterias)
-    if rankings:
-        genre_ranking = rankings[0].genre_ranking
-        return {'genre_ranking': genre_ranking}
-    return {'genre_ranking': []}
-
-@router.get('/get_top_ranking')
-def get_top_ranking(
-    db_session: db_session_type,
-    skip: int = 0,
-    limit: int = 100,
-    genre: Optional[str] = Query(None),
-    order_by: Optional[OrderType] = Query(None),
-):
-    """
-    Obtém o top ranking de gêneros do banco de dados.
-    """
-    criterias = {}
-    if genre:
-        criterias['genre'] = genre
-
-    rankings = ranking_controller.get_all(db_session, skip, limit, order_by, **criterias)
-    if rankings:
-        top_ranking = rankings[0].top_genre_ranking
-        return {'top_ranking': top_ranking}
-    return {'top_ranking': []}
-
-
-@router.post('/save_ranking', status_code=201)
+@router.post('/save_ranking', status_code=201, response_model=RankingResponse)
 def save_full_ranking(
     db_session: db_session_type,
     request: Request,
@@ -88,7 +40,7 @@ def save_full_ranking(
     limit: int = 100,
     genre: Optional[str] = Query(None),
     order_by: Optional[OrderType] = Query(None),
-):
+) -> RankingResponse:
     """
     Obtém uma lista de artistas e o top 5 de gêneros mais comuns do banco de dados, 
     e salva como JSON nos campos `genre_ranking` e `top_genre_ranking` na tabela `Rankings`.
@@ -106,10 +58,10 @@ def save_full_ranking(
 
     ranking = Ranking(
         genre_ranking=genre_ranking,
-        top_genre_ranking=top_ranking
+        top_genre_ranking=top_ranking,
+        genre_select=genre,
+        order_by=order_by
     )
     ranking.audit_user_ip = request.client.host
     ranking.audit_user_login = current_user.username
-    Rank = ranking_controller.save(db_session, ranking)
-
-    return {'Ranking': Rank}
+    return ranking_controller.save(db_session, ranking)
