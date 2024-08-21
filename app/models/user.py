@@ -1,6 +1,5 @@
 from sqlalchemy import Index
 from sqlalchemy.orm import Mapped, mapped_column
-
 from utils.base_model import AbstractBaseModel
 
 

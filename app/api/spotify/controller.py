@@ -2,12 +2,11 @@ from http import HTTPStatus
 from typing import List
 
 import httpx
-from fastapi import HTTPException
-from sqlalchemy import select
-
 from api.spotify.schemas import SpotifyType
 from database.session import Session
+from fastapi import HTTPException
 from models.artist import Artist
+from sqlalchemy import select
 from utils.base_model import AbstractBaseModel
 from utils.generic_controller import GenericController
 

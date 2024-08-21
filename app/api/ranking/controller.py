@@ -1,12 +1,12 @@
 from collections import Counter
 from typing import List
+
 from api.spotify.controller import ArtistController
-from models.artist import Artist
 from database.session import Session
+from models.artist import Artist
 from models.ranking import Ranking
 from utils.base_model import AbstractBaseModel
 from utils.generic_controller import GenericController
-
 
 artist_controller = ArtistController()
 
@@ -16,7 +16,9 @@ class RankingController(GenericController):
         super().__init__(Ranking)
 
     def get_artists(self, db_session, skip, limit, order, **criterias):
-        return artist_controller.get_all(db_session, skip, limit, order=order, **criterias)
+        return artist_controller.get_all(
+            db_session, skip, limit, order=order, **criterias
+        )
 
     def save(self, db_session: Session, obj: Ranking) -> AbstractBaseModel:
         # TODO: Implementar a lógica de salvar sem permitir duplicidades no banco de dados
@@ -24,10 +26,7 @@ class RankingController(GenericController):
 
     def create_ranking(self, artists_data: List[Artist]):
         top_ranking = [
-            {
-                "artist_name": artist.name,
-                "followers": artist.followers
-            }
+            {'artist_name': artist.name, 'followers': artist.followers}
             for artist in artists_data
         ]
 

@@ -49,6 +49,10 @@ extend_skip = ['migrations']
 extend-exclude = '(migrations/)'
 line_length = 88
 
+[tool.pytest.ini_options]
+pythonpath = "."
+addopts = '-p no:warnings'
+
 [tool.taskipy.tasks]
 lint = 'ruff check . && blue --check . --diff'
 format = 'blue .  && isort .'

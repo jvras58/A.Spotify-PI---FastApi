@@ -5,7 +5,6 @@ import requests
 from bcrypt import checkpw, gensalt, hashpw
 from fastapi import HTTPException
 from jose import jwt
-
 from utils.settings import get_settings
 
 # Obtém o logger

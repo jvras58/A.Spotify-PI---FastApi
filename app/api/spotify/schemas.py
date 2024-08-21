@@ -40,5 +40,6 @@ class SpotifyType(str, Enum):
     artist = 'artist'
     album = 'album'
 
+
 class OrderType(str, Enum):
-    followers = "followers"
+    followers = 'followers'

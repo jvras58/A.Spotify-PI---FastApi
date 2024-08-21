@@ -4,7 +4,13 @@ from typing import Annotated, List, Optional
 
 from api.authentication.controller import get_current_user
 from api.spotify.controller import ArtistController
-from api.spotify.schemas import ArtistList, ArtistSchema, OrderType, SpotifyType, TopGenresdict
+from api.spotify.schemas import (
+    ArtistList,
+    ArtistSchema,
+    OrderType,
+    SpotifyType,
+    TopGenresdict,
+)
 from database.session import get_session
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from models.artist import Artist
