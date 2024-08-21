@@ -1,9 +1,10 @@
-from database.session import Session
-from models.user import User
 from sqlalchemy import select
-from utils.base_model import AbstractBaseModel
-from utils.generic_controller import GenericController
-from utils.security import get_password_hash
+
+from app.database.session import Session
+from app.models.user import User
+from app.utils.base_model import AbstractBaseModel
+from app.utils.generic_controller import GenericController
+from app.utils.security import get_password_hash
 
 
 class UserController(GenericController):

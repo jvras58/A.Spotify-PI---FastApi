@@ -1,12 +1,12 @@
 from collections import Counter
 from typing import List
 
-from api.spotify.controller import ArtistController
-from database.session import Session
-from models.artist import Artist
-from models.ranking import Ranking
-from utils.base_model import AbstractBaseModel
-from utils.generic_controller import GenericController
+from app.api.spotify.controller import ArtistController
+from app.database.session import Session
+from app.models.artist import Artist
+from app.models.ranking import Ranking
+from app.utils.base_model import AbstractBaseModel
+from app.utils.generic_controller import GenericController
 
 artist_controller = ArtistController()
 

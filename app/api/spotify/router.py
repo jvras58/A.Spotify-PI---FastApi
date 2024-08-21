@@ -2,21 +2,22 @@ from collections import Counter
 from http import HTTPStatus
 from typing import Annotated, List, Optional
 
-from api.authentication.controller import get_current_user
-from api.spotify.controller import ArtistController
-from api.spotify.schemas import (
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from sqlalchemy.orm import Session
+
+from app.api.authentication.controller import get_current_user
+from app.api.spotify.controller import ArtistController
+from app.api.spotify.schemas import (
     ArtistList,
     ArtistSchema,
     OrderType,
     SpotifyType,
     TopGenresdict,
 )
-from database.session import get_session
-from fastapi import APIRouter, Depends, HTTPException, Query, Request
-from models.artist import Artist
-from models.user import User
-from sqlalchemy.orm import Session
-from utils.exceptions import IntegrityValidationException
+from app.database.session import get_session
+from app.models.artist import Artist
+from app.models.user import User
+from app.utils.exceptions import IntegrityValidationException
 
 router = APIRouter()
 artist_controller = ArtistController()

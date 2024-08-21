@@ -1,17 +1,18 @@
 from typing import Annotated
 
-from api.authentication.schemas import TokenData
-from api.user.controller import UserController
-from database.session import Session, get_session
 from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError
-from models.user import User
-from utils.exceptions import (
+
+from app.api.authentication.schemas import TokenData
+from app.api.user.controller import UserController
+from app.database.session import Session, get_session
+from app.models.user import User
+from app.utils.exceptions import (
     CredentialsValidationException,
     IncorrectCredentialException,
 )
-from utils.security import (
+from app.utils.security import (
     create_access_token,
     extract_spotify_token,
     extract_username,

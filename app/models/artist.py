@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Mapped, mapped_column
-from utils.base_model import AbstractBaseModel
+
+from app.utils.base_model import AbstractBaseModel
 
 
 class Artist(AbstractBaseModel):

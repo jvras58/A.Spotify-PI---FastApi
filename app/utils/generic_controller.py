@@ -3,8 +3,9 @@ from typing import Optional
 from sqlalchemy import String, and_, desc, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
-from utils.base_model import AbstractBaseModel
-from utils.exceptions import IntegrityValidationException, ObjectNotFoundException
+
+from app.utils.base_model import AbstractBaseModel
+from app.utils.exceptions import IntegrityValidationException, ObjectNotFoundException
 
 
 class GenericController:

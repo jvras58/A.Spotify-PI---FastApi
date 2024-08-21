@@ -1,14 +1,20 @@
 from typing import Annotated, List, Optional
 
-from api.authentication.controller import get_current_user
-from api.ranking.controller import RankingController
-from api.ranking.schemas import GenreRanking, RankingList, RankingResponse, TopRanking
-from api.spotify.schemas import OrderType
-from database.session import get_session
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
-from models.ranking import Ranking
-from models.user import User
 from sqlalchemy.orm import Session
+
+from app.api.authentication.controller import get_current_user
+from app.api.ranking.controller import RankingController
+from app.api.ranking.schemas import (
+    GenreRanking,
+    RankingList,
+    RankingResponse,
+    TopRanking,
+)
+from app.api.spotify.schemas import OrderType
+from app.database.session import get_session
+from app.models.ranking import Ranking
+from app.models.user import User
 
 router = APIRouter()
 ranking_controller = RankingController()
