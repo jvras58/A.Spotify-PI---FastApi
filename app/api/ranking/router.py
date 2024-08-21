@@ -18,6 +18,66 @@ ranking_controller = RankingController()
 db_session_type = Annotated[Session, Depends(get_session)]
 CurrentUser = Annotated[User, Depends(get_current_user)]
 
+@router.get('/get_all_rankings')
+def read_artists_rankings(
+    db_session: db_session_type,
+    skip: int = 0,
+    limit: int = 100,
+    genre: Optional[str] = Query(None),
+    order_by: Optional[OrderType] = Query(None),
+):
+    """
+    Obtém uma lista dos rankings `top_genre` e `ranking_artist_genre` do banco de dados.
+    """
+    criterias = {}
+    if genre:
+        criterias['genre'] = genre
+
+    rankings = ranking_controller.get_all(db_session, skip, limit, order_by, **criterias)
+    return {'rankings': rankings}
+
+@router.get('/get_genre_ranking')
+def get_genre_ranking(
+    db_session: db_session_type,
+    skip: int = 0,
+    limit: int = 100,
+    genre: Optional[str] = Query(None),
+    order_by: Optional[OrderType] = Query(None),
+):
+    """
+    Obtém o ranking de gêneros do banco de dados.
+    """
+    criterias = {}
+    if genre:
+        criterias['genre'] = genre
+
+    rankings = ranking_controller.get_all(db_session, skip, limit, order_by, **criterias)
+    if rankings:
+        genre_ranking = rankings[0].genre_ranking
+        return {'genre_ranking': genre_ranking}
+    return {'genre_ranking': []}
+
+@router.get('/get_top_ranking')
+def get_top_ranking(
+    db_session: db_session_type,
+    skip: int = 0,
+    limit: int = 100,
+    genre: Optional[str] = Query(None),
+    order_by: Optional[OrderType] = Query(None),
+):
+    """
+    Obtém o top ranking de gêneros do banco de dados.
+    """
+    criterias = {}
+    if genre:
+        criterias['genre'] = genre
+
+    rankings = ranking_controller.get_all(db_session, skip, limit, order_by, **criterias)
+    if rankings:
+        top_ranking = rankings[0].top_genre_ranking
+        return {'top_ranking': top_ranking}
+    return {'top_ranking': []}
+
 
 @router.post('/save_ranking', status_code=201)
 def save_full_ranking(
