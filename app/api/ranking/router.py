@@ -17,6 +17,7 @@ ranking_controller = RankingController()
 db_session_type = Annotated[Session, Depends(get_session)]
 CurrentUser = Annotated[User, Depends(get_current_user)]
 
+
 @router.get('/get_all_rankings', response_model=RankingList)
 def read_rankings(
     db_session: db_session_type,
@@ -31,7 +32,7 @@ def read_rankings(
 
 
 @router.get('/get_genre_ranking', response_model=List[GenreRanking])
-def get_genre_ranking(db_session: db_session_type)-> List[GenreRanking]:
+def get_genre_ranking(db_session: db_session_type) -> List[GenreRanking]:
     """
     Retorna o genre_ranking do banco de dados.
     """
@@ -41,9 +42,10 @@ def get_genre_ranking(db_session: db_session_type)-> List[GenreRanking]:
 
     genre_ranking_list = [
         {
-        'id': ranking.id, 'genre_ranking': ranking.genre_ranking,
-        'genre_select': ranking.genre_select,
-        'order_by': ranking.order_by
+            'id': ranking.id,
+            'genre_ranking': ranking.genre_ranking,
+            'genre_select': ranking.genre_select,
+            'order_by': ranking.order_by,
         }
         for ranking in rankings
         if ranking.genre_ranking
@@ -55,7 +57,7 @@ def get_genre_ranking(db_session: db_session_type)-> List[GenreRanking]:
 @router.get(
     '/get_top_ranking',
     response_model=List[TopRanking],
-) 
+)
 def get_top_ranking(db_session: db_session_type) -> List[TopRanking]:
     """Retorna o top_ranking por genero do banco de dados."""
     rankings = ranking_controller.get_all(db_session)
@@ -64,9 +66,10 @@ def get_top_ranking(db_session: db_session_type) -> List[TopRanking]:
 
     top_ranking_list = [
         {
-        'id': ranking.id, 'top_ranking': ranking.top_genre_ranking,
-        'genre_select': ranking.genre_select,
-        'order_by': ranking.order_by
+            'id': ranking.id,
+            'top_ranking': ranking.top_genre_ranking,
+            'genre_select': ranking.genre_select,
+            'order_by': ranking.order_by,
         }
         for ranking in rankings
         if ranking.top_genre_ranking

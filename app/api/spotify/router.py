@@ -54,7 +54,6 @@ def read_artists(
 
 @router.get('/top5', response_model=TopGenresdict)
 def read_ranking_generos_top5(
-
     db_session: db_session_type,
     skip: int = 0,
     limit: int = 100,

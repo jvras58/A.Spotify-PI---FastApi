@@ -1,12 +1,11 @@
 from typing import Annotated
 
-from fastapi import Depends
-from fastapi.security import OAuth2PasswordBearer
-from jose import JWTError
-
 from api.authentication.schemas import TokenData
 from api.user.controller import UserController
 from database.session import Session, get_session
+from fastapi import Depends
+from fastapi.security import OAuth2PasswordBearer
+from jose import JWTError
 from models.user import User
 from utils.exceptions import (
     CredentialsValidationException,
