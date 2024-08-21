@@ -40,10 +40,15 @@ def get_genre_ranking(db_session: db_session_type)-> List[GenreRanking]:
         raise HTTPException(status_code=404, detail='Top 5 gêneros não encontrada')
 
     genre_ranking_list = [
-        {'id': ranking.id, 'genre_ranking': ranking.genre_ranking}
+        {
+        'id': ranking.id, 'genre_ranking': ranking.genre_ranking,
+        'genre_select': ranking.genre_select,
+        'order_by': ranking.order_by
+        }
         for ranking in rankings
         if ranking.genre_ranking
     ]
+
     return genre_ranking_list
 
 
@@ -58,7 +63,11 @@ def get_top_ranking(db_session: db_session_type) -> List[TopRanking]:
         raise HTTPException(status_code=404, detail='Classificação não encontrada')
 
     top_ranking_list = [
-        {'id': ranking.id, 'top_ranking': ranking.top_genre_ranking}
+        {
+        'id': ranking.id, 'top_ranking': ranking.top_genre_ranking,
+        'genre_select': ranking.genre_select,
+        'order_by': ranking.order_by
+        }
         for ranking in rankings
         if ranking.top_genre_ranking
     ]

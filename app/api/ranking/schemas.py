@@ -35,6 +35,8 @@ class GenreRanking(BaseModel):
     Representa o ranking de gêneros.
     """
     id: int
+    genre_select: Optional[str] = None
+    order_by: Optional[str] = None
     genre_ranking: List[str]
 
 
@@ -43,4 +45,6 @@ class TopRanking(BaseModel):
     Representa o top_ranking pelos gêneros.
     """
     id: int
+    genre_select: Optional[str] = None
+    order_by: Optional[str] = None
     top_ranking: Optional[List[ArtistRanking]]
